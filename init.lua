@@ -42,7 +42,7 @@ function set_skybox()
 	local y = pos.y
 	local l = 200 -- skybox length
 	local r = 200 -- distance to skybox
-	local R = 500 -- distance to horizon
+	local R = 5000 -- distance to horizon (how far can you see?)
 
 	local n = 100*(0.5*l - y*r/R)/l -- % of sea on the skybox
 
