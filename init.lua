@@ -41,7 +41,7 @@ minetest.register_node("farmap:stone", {
 if minetest.get_modpath("hud_monitor") then
 	function farmap.get_bottom(pos,h,w)
 		if pos.y < 10 then
-			return
+			return "farmap_sea.png"
 		end
 		if not w then
 			w = h
@@ -49,11 +49,20 @@ if minetest.get_modpath("hud_monitor") then
 		local tiles = "[combine:" .. h .. "x" .. w
 		for dx=0,h-1 do
 		for dz=0,w-1 do
-			local x = pos.x + pos.y/100*dx
-			local z = pos.z + pos.y/100*dz
+			local x = pos.x + pos.y/20*dx
+			local z = pos.z + pos.y/20*dz
 			local land_base = gen.landbase(x,z)
-			local tile = "blue.png"
-			if land_base >= 0 then
+			local y = land_base
+			local temperature = gen.heat(x, y, z)
+			local node = gen.get_node(x, y, z, land_base, temperature)
+			local tile = "farmap_sea.png"
+			if land_base <= 0 then
+				tile = "farmap_sea.png"
+			elseif node == "default:sand" then
+				tile = "farmap_sand.png"
+			elseif node == "default:ice" then
+				tile = "farmap_ice.png"
+			elseif land_base >= 0 then
 				tile = "green.png"
 			end
 
@@ -78,7 +87,7 @@ function set_skybox()
 
 	local side_texture = farmap.top .. "^[lowpart:".. n ..":" .. farmap.water
 
-	farmap.bottom = farmap.get_bottom(pos,60)
+	farmap.bottom = farmap.get_bottom(pos,50)
 
 	local skytextures = {
 		farmap.top, -- +y
