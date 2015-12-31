@@ -1,3 +1,8 @@
+farmap = {}
+
+farmap.top = "sky_top.png"
+farmap.water = "sky_water.png"
+--[[
 function stretch_texture(texture,h,w)
 	if not w then
 		w = h
@@ -21,15 +26,15 @@ farmap.water = "sky_water.png"
 
 farmap.top_s = stretch_texture(farmap.top, farmap.h, farmap.w)
 farmap.water_s = stretch_texture(farmap.water, farmap.h, farmap.w)
-local texture = farmap.water_s .. "^([lowpart:".. 50 ..":" .. farmap.top_s .. ")"
-
+--local texture = farmap.top_s .. "^[lowpart:".. "50" .. ":" .. farmap.water
+local texture = "default_wood.png^[lowpart:50:[combine:16x32:0,0=default_snow.png:0,16=default_tree.png"
+--]]
 minetest.register_node("farmap:stone", {
 	description = "Farmap Debug Stone",
-	tiles = {texture},
+	tiles = {farmap.top .. "^[lowpart:".. "50" ..":" .. farmap.water},
 	groups = {cracky=3, stone=1},
 })
 
---[[
 function set_skybox()
 	for _,player in ipairs(minetest.get_connected_players()) do
 	local pos = player:getpos()
@@ -41,11 +46,11 @@ function set_skybox()
 
 	local n = 100*(0.5*l - y*r/R)/l -- % of sea on the skybox
 
-	local side_texture = farmap.top_s .. "^[lowpart:".. 50 ..":" .. farmap.water_s
+	local side_texture = farmap.top .. "^[lowpart:".. n ..":" .. farmap.water
 
 	local skytextures = {
-		farmap.top_s, -- +y
-		farmap.water_s, -- -y
+		farmap.top, -- +y
+		farmap.water, -- -y
 		side_texture, -- +z
 		side_texture, -- -z
 		side_texture, -- -x
@@ -62,4 +67,3 @@ minetest.register_globalstep(function(dtime)
 		set_skybox()
 	end
 end)
---]]
