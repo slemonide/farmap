@@ -1,58 +1,41 @@
 modpath = minetest.get_modpath("farmap")
 dofile(modpath .. "/textures.lua") -- Load textures
 
-local pi = math.pi
-local sin = math.sin
-local cos = math.cos
-
-local max_size = 10 -- Maximum height and width of one of the sky textures
-
 function draw_skybox_tile(dir, pos)
 
-	local min_R = 0 -- Min viewing range
-	local max_R = 3 -- Max viewing range
+	local D = 10
 
-	local angle = pi/2 -- angle for the skybox tile
-
-	local tiles = "[combine:" .. max_size .. "x" .. max_size
+	local tiles = "[combine:" .. 2*D + 1 .. "x" .. 2*D + 1
 	local tile = ""
 
-	for v = 0, max_size do
-		local v_a = angle * (v / max_size) - pi/4
-		for h = 0, max_size do
-			local h_a = angle * (h / max_size) - pi/4
+	for v = -D, D do
+	for h = -D, D do
 
-			local R = min_R
-			local tile_done = false
-			while R <= max_R and not tile_done do
-				local x = R * cos(h_a)
-				local y = R * cos(v_a)
-				local z = R * sin(h_a)
+		pos = {x=0,y=200,z=0}
 
-				if dir == "nx" then
-					x = -x
-				elseif dir == "ny" then
-					y = -y
-				elseif dir == "nz" then
-					z = -z
-				end
-
-				pos = {x = pos.x + x ,y = pos.y + y, z = pos.z + z}
-				local node_name = minetest.get_node(pos).name
---				print(node_name)
-				if node_name ~= "ignore" and node_name ~= "air" then
-					tile = "unknown"
-					tile_done = true
-				elseif R == max_R then
-					tile = "air"
-					tile_done = true
-				end
-
-				R = R + 1
-			end
-
-			tiles = tiles .. ":" .. v - 1 .. "," .. h - 1 .. "=" .. textures[tile]
+		if dir == "px" then
+			pos = {x = pos.x + D, y = pos.y + v, z = pos.z + h}
+		elseif dir == "py" then
+			pos = {x = pos.x + v, y = pos.y + D, z = pos.z + h}
+		elseif dir == "pz" then
+			pos = {x = pos.x + v, y = pos.y + h, z = pos.z + D}
+		elseif dir == "nx" then
+			pos = {x = pos.x - D, y = pos.y + v, z = pos.z + h}
+		elseif dir == "ny" then
+			pos = {x = pos.x + v, y = pos.y - D, z = pos.z + h}
+		elseif dir == "nz" then
+			pos = {x = pos.x + v, y = pos.y + h, z = pos.z - D}
 		end
+
+		local node_name = minetest.get_node(pos).name
+		if node_name == "ignore" or node_name == "air" then
+			tile = "air"
+		else
+			tile = "unknown"
+		end
+
+		tiles = tiles .. ":" .. v + D .. "," .. h + D .. "=" .. textures[tile]
+	end
 	end
 
 	return tiles
@@ -60,7 +43,7 @@ end
 
 function set_skybox()
 	for _,player in ipairs(minetest.get_connected_players()) do
-		local pos = player:getpos()
+		local pos = vector.round(player:getpos())
 
 		local dirs = {"px", "py", "pz", "nx", "ny", "nz"}
 		local dir = {}
@@ -68,8 +51,6 @@ function set_skybox()
 		for _,s_dir in pairs(dirs) do -- Prepare dir table
 			dir[s_dir] = draw_skybox_tile(s_dir, pos)
 		end
-
-		--print(minetest.serialize(dir.px))
 
 		local skytextures = {
 			dir.py,
@@ -81,6 +62,6 @@ function set_skybox()
 		}
 		player:set_sky({}, "skybox", skytextures)
 	end
-	minetest.after(5, set_skybox)
+	minetest.after(1, set_skybox)
 end
 minetest.after(1, set_skybox)
