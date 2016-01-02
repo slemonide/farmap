@@ -8,8 +8,14 @@ function draw_skybox_tile(dir, pos)
 
 	--pos = {x=0,y=300,z=0} -- for debug
 	local D = 0
+	local S = 0
+	local S_min = 1
+	local S_max = 10
+	local D_min = 1
+	local D_max = 24
 	if minetest.get_modpath("gridgen") then
-		D = 24
+		S = 2 -- stretch
+		D = 23 -- distance
 	else
 		D = 24
 	end
@@ -23,6 +29,34 @@ function draw_skybox_tile(dir, pos)
 
 		--pos = {x=0,y=200,z=0}
 
+	local node_name = ""
+	if minetest.get_modpath("gridgen") then
+		for S = S_min, S_max do
+		for D = D_min, D_max do
+			local R = D*S
+			if dir == "px" then
+				dpos = {x = pos.x + R, y = pos.y + v*S, z = pos.z + h*S}
+			elseif dir == "py" then
+				dpos = {x = pos.x + v*S, y = pos.y + R, z = pos.z + h*S}
+			elseif dir == "pz" then
+				dpos = {x = pos.x + v*S, y = pos.y + h*S, z = pos.z + R}
+			elseif dir == "nx" then
+				dpos = {x = pos.x - R, y = pos.y + v*S, z = pos.z + h*S}
+			elseif dir == "ny" then
+				dpos = {x = pos.x + v*S, y = pos.y - R, z = pos.z + h*S}
+			elseif dir == "nz" then
+				dpos = {x = pos.x + v*S, y = pos.y + h*S, z = pos.z - R}
+			end
+
+			local land_base = gen.landbase(dpos.x, dpos.z)
+			local temperature = gen.heat(dpos.x, dpos.y, dpos.z)
+			node_name = gen.get_node(dpos.x, dpos.y, dpos.z, land_base, temperature)
+			if node_name ~= "air" then
+				break
+			end
+		end
+		end
+	else
 		if dir == "px" then
 			dpos = {x = pos.x + D, y = pos.y + v, z = pos.z + h}
 		elseif dir == "py" then
@@ -37,14 +71,9 @@ function draw_skybox_tile(dir, pos)
 			dpos = {x = pos.x + v, y = pos.y + h, z = pos.z - D}
 		end
 
-		local node_name = ""
-		if minetest.get_modpath("gridgen") then
-			local land_base = gen.landbase(dpos.x, dpos.z)
-			local temperature = gen.heat(dpos.x, dpos.y, dpos.z)
-			node_name = gen.get_node(dpos.x, dpos.y, dpos.z, land_base, temperature)
-		else
-			node_name = minetest.get_node(dpos).name
-		end
+		node_name = minetest.get_node(dpos).name
+	end
+
 		local texture = textures[node_name]
 		if not texture then -- In case of absent texture
 			texture = textures["unknown"]
@@ -58,6 +87,10 @@ function draw_skybox_tile(dir, pos)
 		tiles = tiles .. "^[transformR90FX"
 	elseif dir == "nx" then
 		tiles = tiles .. "^[transformR90"
+	elseif dir == "py" then
+		tiles = tiles .. "^[transformR270"
+	elseif dir == "ny" then
+		tiles = tiles .. "^[transformR90FX"
 	elseif dir == "nz" then
 		tiles = tiles .. "^[transformR180"
 	elseif dir == "pz" then
@@ -85,19 +118,14 @@ function set_skybox()
 		if not skybox_data[player_name].old_pos then
 			skybox_data[player_name].old_pos = pos
 			break
-		elseif vector.equals(skybox_data[player_name].old_pos, pos) then
-			if map_done then
-				break
-			else
-				map_done = true
-			end
-		else
-			map_done = false
+		end
+
+		if not vector.equals(skybox_data[player_name].old_pos, pos) then
+			skybox_data[player_name].old_pos = pos
 			break
 		end
 
 		local dirs = {"px", "py", "pz", "nx", "ny", "nz"}
-		--local dirs = {"px", "pz", "nx", "nz"}
 		local dir = {}
 
 		for _,s_dir in pairs(dirs) do -- Prepare dir table
