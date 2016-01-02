@@ -3,50 +3,25 @@ farmap = {}
 farmap.top = "sky_top.png"
 farmap.water = "sky_water.png"
 farmap.bottom = farmap.water
+
+function set_skybox()
+	for _,player in ipairs(minetest.get_connected_players()) do
+	local pos = player:getpos()
+
+	local y = pos.y
+
+	local a_max = 50*4 -- maximum number of angles
+
+	local dir_templ = "[combine:" .. a_max/4 .. "x" .. a_max/4
+
+	local px = dir_templ
+	local py = dir_templ
+	local pz = dir_templ
+	local nx = dir_templ
+	local ny = dir_templ
+	local nz = dir_templ
 --[[
-function stretch_texture(texture,h,w)
-	if not w then
-		w = h
-	end
-	local tile = "[combine:" .. h .. "x" .. w
-	for x=0,h-1 do
-	for y=0,w-1 do
-		tile = tile .. ":" .. x .. "," .. y .. "=" .. texture
-	end
-	end
 
-	return tile
-end
-
-farmap = {}
-
-farmap.h = 10
-farmap.w = 10
-farmap.top = "sky_top.png"
-farmap.water = "sky_water.png"
-
-farmap.top_s = stretch_texture(farmap.top, farmap.h, farmap.w)
-farmap.water_s = stretch_texture(farmap.water, farmap.h, farmap.w)
---local texture = farmap.top_s .. "^[lowpart:".. "50" .. ":" .. farmap.water
-local texture = "default_wood.png^[lowpart:50:[combine:16x32:0,0=default_snow.png:0,16=default_tree.png"
-
-minetest.register_node("farmap:stone", {
-	description = "Farmap Debug Stone",
-	tiles = {farmap.top .. "^[lowpart:".. "50" ..":" .. farmap.water},
-	groups = {cracky=3, stone=1},
-})
---]]
-
-
-if minetest.get_modpath("hud_monitor") then
-	function farmap.get_bottom(pos,h,w)
-		if pos.y < 10 then
-			return "farmap_sea.png"
-		end
-		if not w then
-			w = h
-		end
-		local tiles = "[combine:" .. h .. "x" .. w
 		for dx=0,h-1 do
 		for dz=0,w-1 do
 			local x = pos.x + pos.y/20*dx
@@ -61,44 +36,128 @@ if minetest.get_modpath("hud_monitor") then
 			elseif node == "default:sand" then
 				tile = "farmap_sand.png"
 			elseif node == "default:ice" then
-				tile = "farmap_ice.png"
+					tile = "farmap_ice.png"
 			elseif land_base >= 0 then
 				tile = "green.png"
 			end
-
 			tiles = tiles .. ":" .. dx .. "," .. dz .. "=" .. tile
 		end
 		end
+--]]
 
-		return tiles
+	local MIN_R = 10
+	local MAX_R = 100
+
+	for dxz=0,a_max do -- dxz - angle in x-z plane
+	for dxy=0,a_max do -- dxy - angle in x-y plane
+		local pi = math.pi
+		local sin = math.sin
+		local cos = math.cos
+		local a_xz = 2*pi*(dxz/a_max)
+		local a_xy = 2*pi*(dxy/a_max)
+
+		--[[ A note about sky textures:
+			px - positive x; py - pisitive y; nx - negative x
+			Counting of angles always starts counter clockwise
+			from the positive direction of the x-axis
+		--]]
+		local dir = ""
+		if a_xy >= pi/4 and a_xy <= 3*pi/4 then
+--			dir = "py"
+			for R = MIN_R, MAX_R do
+				local x = R*sin(a_xz)
+				local y = R*sin(a_xy)
+				local z = R*cos(a_xz)
+
+				local land_base = gen.landbase(x,z)
+				local temperature = gen.heat(x, land_base, z)
+				local node = gen.get_node(x, y, z, land_base, temperature)
+
+				if node == "" then
+					py = "sky_top.png"
+				else
+					py = "green.png"
+				end
+			end
+		elseif a_xy >= 5*pi/4 and a_xy <= 7*pi/4 then
+--			dir = "ny"
+			ny = "ny.png"
+		elseif a_xz >= 7*pi/4 or a_xz <= pi/4 then -- Notice "or" here. It is there for a reason.
+--			dir = "px"
+			px = "px.png"
+		elseif a_xz >= pi/4 and a_xz <= 3*pi/4 then
+--			dir = "pz"
+			pz = "pz.png"
+		elseif a_xz >= 3*pi/4 and a_xz <= 5*pi/4 then
+--			dir = "nx"
+			nx = "nx.png"
+		elseif a_xz >= 5*pi/4 and a_xz <= 7*pi/4 then
+--			dir = "nz"
+			nz = "nz.png"
+		end
 	end
-end
+	end
 
-function set_skybox()
-	for _,player in ipairs(minetest.get_connected_players()) do
-	local pos = player:getpos()
 
-	local y = pos.y
-	local l = 200 -- skybox length
-	local r = 200 -- distance to skybox
-	local R = 5000 -- distance to horizon (how far can you see?)
 
-	local n = 100*(0.5*l - y*r/R)/l -- % of sea on the skybox
-
-	local side_texture = farmap.top .. "^[lowpart:".. n ..":" .. farmap.water
-
-	farmap.bottom = farmap.get_bottom(pos,50)
 
 	local skytextures = {
-		farmap.top, -- +y
-		farmap.bottom, -- -y
-		side_texture, -- +z
-		side_texture, -- -z
-		side_texture, -- -x
-		side_texture, -- +x
+		py, -- +y
+		ny, -- -y
+		pz, -- +z
+		nz, -- -z
+		nx, -- -x
+		px, -- +x
 	}
 	player:set_sky({}, "skybox", skytextures)
 	end
 	minetest.after(1, set_skybox)
 end
 minetest.after(1, set_skybox)
+
+minetest.register_node(":default:water_source", { -- Redefine water
+	description = "Water Source",
+	drawtype = "liquid",
+	tiles = {farmap.water},
+--	paramtype = "light",
+	walkable = false,
+	pointable = false,
+	diggable = false,
+	buildable_to = true,
+	is_ground_content = false,
+	drop = "",
+	drowning = 1,
+	liquidtype = "source",
+	liquid_alternative_flowing = "default:water_flowing",
+	liquid_alternative_source = "default:water_source",
+	liquid_viscosity = 1,
+	post_effect_color = {a = 103, r = 30, g = 60, b = 90},
+	groups = {water = 3, liquid = 3, puts_out_fire = 1},
+})
+
+minetest.register_node(":default:water_flowing", {
+	description = "Flowing Water",
+	drawtype = "flowingliquid",
+	tiles = {farmap.water},
+--	paramtype = "light",
+	paramtype2 = "flowingliquid",
+	walkable = false,
+	pointable = false,
+	diggable = false,
+	buildable_to = true,
+	is_ground_content = false,
+	drop = "",
+	drowning = 1,
+	liquidtype = "flowing",
+	liquid_alternative_flowing = "default:water_flowing",
+	liquid_alternative_source = "default:water_source",
+	liquid_viscosity = 1,
+	post_effect_color = {a = 103, r = 30, g = 60, b = 90},
+	groups = {water = 3, liquid = 3, puts_out_fire = 1,
+		not_in_creative_inventory = 1},
+})
+
+minetest.after(0, function() -- Time is not supported for now
+	minetest.setting_set("time_speed", 0)
+end)
+
