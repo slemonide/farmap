@@ -3,38 +3,50 @@ dofile(modpath .. "/textures.lua") -- Load textures
 
 function draw_skybox_tile(dir, pos)
 
-	local D = 10
+	local D = 0
+	if minetest.get_modpath("gridgen") then
+		D = 21
+	else
+		D = 5
+	end
 
 	local tiles = "[combine:" .. 2*D + 1 .. "x" .. 2*D + 1
 	local tile = ""
+	local dpos = {} -- Local pos used to find blocks
 
 	for v = -D, D do
 	for h = -D, D do
 
-		pos = {x=0,y=200,z=0}
+		--pos = {x=0,y=200,z=0}
 
 		if dir == "px" then
-			pos = {x = pos.x + D, y = pos.y + v, z = pos.z + h}
+			dpos = {x = pos.x + D, y = pos.y + v, z = pos.z + h}
 		elseif dir == "py" then
-			pos = {x = pos.x + v, y = pos.y + D, z = pos.z + h}
+			dpos = {x = pos.x + v, y = pos.y + D, z = pos.z + h}
 		elseif dir == "pz" then
-			pos = {x = pos.x + v, y = pos.y + h, z = pos.z + D}
+			dpos = {x = pos.x + v, y = pos.y + h, z = pos.z + D}
 		elseif dir == "nx" then
-			pos = {x = pos.x - D, y = pos.y + v, z = pos.z + h}
+			dpos = {x = pos.x - D, y = pos.y + v, z = pos.z + h}
 		elseif dir == "ny" then
-			pos = {x = pos.x + v, y = pos.y - D, z = pos.z + h}
+			dpos = {x = pos.x + v, y = pos.y - D, z = pos.z + h}
 		elseif dir == "nz" then
-			pos = {x = pos.x + v, y = pos.y + h, z = pos.z - D}
+			dpos = {x = pos.x + v, y = pos.y + h, z = pos.z - D}
 		end
 
-		local node_name = minetest.get_node(pos).name
-		if node_name == "ignore" or node_name == "air" then
-			tile = "air"
+		local node_name = ""
+		if minetest.get_modpath("gridgen") then
+			local land_base = gen.landbase(dpos.x, dpos.z)
+			local temperature = gen.heat(dpos.x, dpos.y, dpos.z)
+			node_name = gen.get_node(dpos.x, dpos.y, dpos.z, land_base, temperature)
 		else
-			tile = "unknown"
+			node_name = minetest.get_node(dpos).name
+		end
+		local texture = textures[node_name]
+		if not texture then -- In case of absent texture
+			texture = textures["unknown"]
 		end
 
-		tiles = tiles .. ":" .. v + D .. "," .. h + D .. "=" .. textures[tile]
+		tiles = tiles .. ":" .. v + D .. "," .. D + h .. "=" .. texture
 	end
 	end
 
@@ -53,15 +65,15 @@ function set_skybox()
 		end
 
 		local skytextures = {
-			dir.py,
-			dir.ny,
-			dir.px,
-			dir.nx,
-			dir.nz,
-			dir.pz,
+			dir.py .. "^[transformR270",
+			dir.ny .. "^[transformR90FX",
+			dir.px .. "^[transformR90FX",
+			dir.nx .. "^[transformR90",
+			dir.nz .. "^[transformR180",
+			dir.pz .. "^[transformFY",
 		}
 		player:set_sky({}, "skybox", skytextures)
 	end
-	minetest.after(1, set_skybox)
+	minetest.after(10, set_skybox)
 end
-minetest.after(1, set_skybox)
+minetest.after(2, set_skybox)
