@@ -24,7 +24,10 @@ textures["default:dry_grass_4"] = textures["default:dry_shrub"]
 textures["default:dry_grass_5"] = textures["default:dry_shrub"]
 
 textures["default:sand"] = "farmap_default_sand.png"
-textures["default:dirt_with_snow"] = "farmap_default_snow.png"
+
+textures["default:snow"] = "farmap_default_snow.png"
+textures["default:snowblock"] = textures["default:snow"]
+textures["default:dirt_with_snow"] = textures["default:snow"]
 
 textures["default:cobble"] = "farmap_default_cobble.png"
 textures["wool:red"] = "farmap_wool_red.png"
@@ -129,7 +132,6 @@ farming:cotton_3
 stairs:slab_goldblock
 stairs:stair_goldblock
 default:jungleleaves
-default:snow
 stairs:stair_sandstone
 stairs:stair_bronzeblock
 tnt:tnt_burning
@@ -138,7 +140,6 @@ stairs:stair_copperblock
 stairs:slab_steelblock
 stairs:slab_stonebrick
 beds:fancy_bed_bottom
-default:snowblock
 stairs:stair_brick
 stairs:slab_obsidianbrick
 default:cloud
@@ -217,7 +218,6 @@ default:stone_with_coal
 stairs:slab_bronzeblock
 default:nyancat_rainbow
 flowers:mushroom_brown
-default:dirt_with_snow
 default:sign_wall
 xpanes:pane_13
 default:stone_with_diamond
