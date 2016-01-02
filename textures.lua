@@ -6,9 +6,25 @@ textures["ignore"] = textures["air"]
 textures["unknown"] = "farmap_unknown.png"
 
 textures["default:dirt"] = "farmap_default_dirt.png"
-textures["default:dirt_with_grass"] = textures["default:dirt"]
-textures["default:dirt_with_dry_grass"] = textures["default:dirt"]
-textures["default:dirt_with_snow"] = textures["default:dirt"]
+
+textures["default:junglegrass"] = "farmap_grass.png"
+textures["default:dirt_with_grass"] = textures["default:junglegrass"]
+textures["default:grass_1"] = textures["default:junglegrass"]
+textures["default:grass_2"] = textures["default:junglegrass"]
+textures["default:grass_3"] = textures["default:junglegrass"]
+textures["default:grass_4"] = textures["default:junglegrass"]
+textures["default:dirt_with_grass_footsteps"] = textures["default:junglegrass"]
+
+textures["default:dry_shrub"] = "farmap_dry_grass.png"
+textures["default:dirt_with_dry_grass"] = textures["default:dry_shrub"]
+textures["default:dry_grass_1"] = textures["default:dry_shrub"]
+textures["default:dry_grass_2"] = textures["default:dry_shrub"]
+textures["default:dry_grass_3"] = textures["default:dry_shrub"]
+textures["default:dry_grass_4"] = textures["default:dry_shrub"]
+textures["default:dry_grass_5"] = textures["default:dry_shrub"]
+
+textures["default:sand"] = "farmap_default_sand.png"
+textures["default:dirt_with_snow"] = "farmap_default_snow.png"
 
 textures["default:cobble"] = "farmap_default_cobble.png"
 textures["wool:red"] = "farmap_wool_red.png"
@@ -19,9 +35,9 @@ textures["default:river_water_source"] = textures["default:water_source"]
 textures["default:river_water_flowing"] = textures["default:water_source"]
 
 --[[
+To add:
 default:pine_tree
 xpanes:pane_12
-default:dry_grass_5
 stairs:slab_stone
 stairs:slab_sandstone
 farming:desert_sand_soil
@@ -29,13 +45,10 @@ xpanes:bar_10
 default:ladder
 farming:soil_wet
 gridgen:center
-default:dry_grass_2
 farming:cotton_8
-default:dry_grass_3
 default:gravel
 wool:yellow
 default:acacia_sapling
-default:dry_shrub
 farming:wheat_1
 xpanes:bar
 vessels:drinking_glass
@@ -57,7 +70,6 @@ farming:cotton_2
 farming:seed_wheat
 gridgen:chlorine_gas
 default:stone_with_gold
-default:dry_grass_4
 stairs:stair_steelblock
 beds:bed_bottom
 default:wood
@@ -67,14 +79,12 @@ default:goldblock
 flowers:waterlily
 xpanes:bar_7
 default:nyancat
-air
 farming:seed_cotton
 flowers:mushroom_red
 flowers:dandelion_white
 wool:black
 default:leaves
 stairs:slab_desert_stonebrick
-default:sand
 xpanes:bar_4
 wool:green
 xpanes:bar_5
@@ -99,7 +109,6 @@ default:meselamp
 wool:brown
 default:junglewood
 xpanes:bar_8
-default:dirt_with_dry_grass
 xpanes:bar_9
 xpanes:pane_8
 tnt:gunpowder_burning
@@ -134,7 +143,6 @@ stairs:stair_brick
 stairs:slab_obsidianbrick
 default:cloud
 stairs:stair_obsidian
-default:grass_1
 fire:basic_flame
 stairs:slab_sandstonebrick
 flowers:viola
@@ -150,11 +158,9 @@ default:chest_locked
 stairs:stair_desert_stone
 stairs:stair_desert_stonebrick
 default:stone_with_copper
-ignore
 stairs:stair_cobble
 wool:white
 stairs:stair_stone
-default:dirt_with_grass
 stairs:slab_acacia_wood
 stairs:stair_acacia_wood
 default:papyrus
@@ -212,7 +218,6 @@ stairs:slab_bronzeblock
 default:nyancat_rainbow
 flowers:mushroom_brown
 default:dirt_with_snow
-default:dry_grass_1
 default:sign_wall
 xpanes:pane_13
 default:stone_with_diamond
@@ -224,7 +229,6 @@ default:desert_cobble
 default:cobble
 default:coalblock
 stairs:slab_desert_cobble
-default:junglegrass
 default:furnace
 default:sandstone
 xpanes:bar_11
@@ -240,7 +244,6 @@ wool:cyan
 default:stone
 default:sapling
 stairs:slab_desert_stone
-default:dirt_with_grass_footsteps
 xpanes:pane_15
 xpanes:pane
 farming:wheat_7
